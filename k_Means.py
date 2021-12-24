@@ -2,14 +2,16 @@ import random
 import math
 import matplotlib.pyplot as plt
 
-k = 4 # number of clusters (max = 7)
-n = 100 # number of data_points
+k = 7 # number of clusters (max = 7)
+n = 500 # number of data_points
 
 color = ['b','g','r','c','m','y','k','w']
 E = []
+C = []
+L = {}
 
 
-#Create random 2D-points
+#Create random 3D-Datapoints
 for i in range(n):
     random_x = random.randint(0,100)
     random_y = random.randint(0,100)
@@ -18,21 +20,63 @@ for i in range(n):
     E.append(point)
 
 
-# plot created Datapoints
-X = []
-Y = []
-Z = []
+def plot(plotClusters, colorDataPoints, title):
+    X_D = []
+    Y_D = []
+    Z_D = []
+  
+    fig = plt.figure(figsize=(10,10))
+    ax = fig.add_subplot(projection='3d')
+    ax.set_xlabel('x')
+    ax.set_xlabel('y')
+    ax.set_xlabel('z')
+    
+    if plotClusters:
+        X_C = []
+        Y_C = []
+        Z_C = []
 
-for x,y,z in E:
-    X.append(x)
-    Y.append(y)
-    Z.append(z)
+        for x,y,z in C:
+            X_C.append(x)
+            Y_C.append(y)
+            Z_C.append(z)
 
-fig = plt.figure(figsize = (10,10))
-ax = fig.add_subplot(projection='3d')
-ax.scatter(X,Y,Z,s = 10, c = color[6])
+        for i,c in enumerate(C):
+            ax.scatter(X_C[i], Y_C[i], Z_C[i], s = 200, c = color[i], marker = "x")
 
-plt.show()
+    if not colorDataPoints:
+        for x,y,z in E:
+            X_D.append(x)
+            Y_D.append(y)
+            Z_D.append(z)
+
+        ax.scatter(X_D, Y_D, Z_D, s = 30, c = 'k', marker = "o")
+    else:
+        pts = []
+
+        for i,c in enumerate(C):
+            pts.clear()
+            X_D.clear()
+            Y_D.clear()
+            Z_D.clear()
+
+            for l in L:
+                if L[l] == i:
+                    pts.append(l)
+
+            for x,y,z in pts:
+                X_D.append(x)
+                Y_D.append(y)
+                Z_D.append(z)
+
+            ax.scatter(X_D, Y_D, Z_D, s = 30, c = color[i], marker = "o")
+
+    plt.title(title)
+    plt.show()
+
+
+#Plot Datapoints
+plot(False, False, "Random Datapoints")
 
 
 def euclidean_distance(data_point_a, data_point_b): #calculates euclidean distance
@@ -51,68 +95,9 @@ def selectRandomCenters(k): # returns k random data points from all data points 
     return random.sample(E, k)
 
 
-def plot1(): # plots Datapoints and colors clusters
-    X1 = []
-    Y1 = []
-    Z1 = []
-    X2 = []
-    Y2 = []
-    Z2 = []
-    
-    for x,y,z in C:
-        X1.append(x)
-        Y1.append(y)
-        Z1.append(z)
-    
-    for x,y,z in E:
-        X2.append(x)
-        Y2.append(y)
-        Z2.append(z)
-    
-    fig = plt.figure(figsize=(10,10))
-    ax = fig.add_subplot(projection='3d')
-    
-    for i,c in enumerate(C):
-        ax.scatter(X1[i], Y1[i], Z1[i], s = 200, c = color[i], marker = "x")
-    
-    ax.scatter(X2, Y2, Z2, s = 10, c = 'k', marker = "o")
-    plt.show()
-
-
 # Choose random datapoints as starting cluster centers
 C = selectRandomCenters(k)
-plot1()
-
-
-def plot2(): # plots Datapoints and colors clusters and corresponding datapoints
-    X1 = []
-    Y1 = []
-    Z1 = []
-    X2 = []
-    Y2 = []
-    Z2 = []
-    
-    for x,y,z in C:
-        X1.append(x)
-        Y1.append(y)
-        Z1.append(z)
-    
-    for x,y,z in E:
-        X2.append(x)
-        Y2.append(y)
-        Z2.append(z)
-    
-    fig = plt.figure(figsize=(10,10))
-    ax = fig.add_subplot(projection='3d')
-    
-    for i,c in enumerate(C):
-        ax.scatter(X1[i], Y1[i], Z1[i], s = 200, c = color[i], marker = "x")
-        
-    for i,e in enumerate(E):
-        colorIndex = C.index(C[L[e]])
-        ax.scatter(X2[i], Y2[i], Z2[i], s = 10, c = color[colorIndex], marker = "o")
-
-    plt.show()
+plot(True, False, "Choose {} random cluster-centers".format(k))
 
 
 def argminDistance(e): # calculates closest cluster for a given datapoint
@@ -128,7 +113,7 @@ def argminDistance(e): # calculates closest cluster for a given datapoint
 
 
 # Find closest cluster for each datapoint
-L = {}
+
 for e in E:
     L[e] = argminDistance(e)
 
@@ -137,7 +122,7 @@ print("Labels:")
 for l in L:
     print("Point",l,", closest cluster-center:",L[l],"at",C[L[l]],", distance:",euclidean_distance(l,C[L[l]]))
 
-plot2()
+plot(True, True, "Assign datapoints to closest cluster-center")
 
 
 def UpdateCluster(c): # moves given cluster to mean position of its current corresponding datapoints
@@ -206,4 +191,5 @@ while True:
 print(" ")
 print("Optimization done")
 print("Number of iterations needed: ",iter)
-plot2()
+print(L)
+plot(True, True, "Optimize cluster-center-positions")
