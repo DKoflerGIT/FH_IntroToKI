@@ -191,5 +191,4 @@ while True:
 print(" ")
 print("Optimization done")
 print("Number of iterations needed: ",iter)
-print(L)
 plot(True, True, "Optimize cluster-center-positions")
